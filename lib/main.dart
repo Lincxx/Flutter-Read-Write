@@ -42,6 +42,7 @@ class _HomeState extends State<Home> {
             ),
             ListTile(
                 title: FlatButton(
+              color: Colors.blueGrey,
               onPressed: () {
                 if (_enterDataField.text.isNotEmpty) {
                   writeData(_enterDataField.text);
@@ -51,7 +52,18 @@ class _HomeState extends State<Home> {
                 children: <Widget>[
                   Text('Save Data'),
                   Padding(padding: EdgeInsets.all(14.5)),
-                  Text('Saved data goes here')
+                  FutureBuilder(
+                    future: readData(),
+                    builder:
+                        (BuildContext context, AsyncSnapshot<String> data) {
+                      if (data.hasData != null) {
+                        return Text(data.data.toString(),
+                            style: TextStyle(color: Colors.white));
+                      } else {
+                        return Text('No Data saved');
+                      }
+                    },
+                  )
                 ],
               ),
             ))
