@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
-void main() {
+void main() async {
+  var data = await readData();
+
+  if (data != null) {
+    String message = await readData();
+    print(message);
+  }
   runApp(MaterialApp(
     title: 'IO',
     home: Home(),
@@ -15,6 +21,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  var _enterDataField = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,36 +30,64 @@ class _HomeState extends State<Home> {
         centerTitle: true,
         backgroundColor: Colors.greenAccent,
       ),
+      body: Container(
+        padding: EdgeInsets.all(13.4),
+        child: Column(
+          children: <Widget>[
+            ListTile(
+              title: TextField(
+                controller: _enterDataField,
+                decoration: InputDecoration(labelText: 'Write Something'),
+              ),
+            ),
+            ListTile(
+                title: FlatButton(
+              onPressed: () {
+                if (_enterDataField.text.isNotEmpty) {
+                  writeData(_enterDataField.text);
+                }
+              },
+              child: Column(
+                children: <Widget>[
+                  Text('Save Data'),
+                  Padding(padding: EdgeInsets.all(14.5)),
+                  Text('Saved data goes here')
+                ],
+              ),
+            ))
+          ],
+        ),
+      ),
     );
   }
+}
 
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path; //home/dir/....
-  }
+Future<String> get _localPath async {
+  final directory = await getApplicationDocumentsDirectory();
+  return directory.path; //home/dir/....
+}
 
-  Future<File> get _localFile async {
-    final path = await _localPath;
+Future<File> get _localFile async {
+  final path = await _localPath;
 
-    return new File('$path/data.txt'); //home/dir/data.txt
-  }
+  return new File('$path/data.txt'); //home/dir/data.txt
+}
 
-  //Write and Read from our file
-  Future<File> writeData(String message) async {
+//Write and Read from our file
+Future<File> writeData(String message) async {
+  final file = await _localFile;
+
+  //write to file
+  return file.writeAsString('$message');
+}
+
+Future<String> readData() async {
+  try {
     final file = await _localFile;
-
-    //write to file
-    return file.writeAsString('$message');
-  }
-
-  Future<String> readData() async {
-    try {
-      final file = await _localFile;
-      //Read
-      String data = await file.readAsString();
-      return data;
-    } catch (e) {
-      return "Nothing saved yet";
-    }
+    //Read
+    String data = await file.readAsString();
+    return data;
+  } catch (e) {
+    return "Nothing saved yet";
   }
 }
